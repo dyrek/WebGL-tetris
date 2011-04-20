@@ -13,9 +13,9 @@ function Engine() {
 	this.pieceX;		// coordinates of the current piece
 	this.pieceY;
 	this.pieceRotMode;	// rotation mode - pieces usually rotate in counterclockwise
-				// direction, but the game is inconsiste in the way that I piece
+				// direction, but the game is inconsistent in the way that "I" piece
 				// rotates first counterclockwise and then clockwise,
-				// and O piece doesn't rotate at all
+				// and "O" piece doesn't rotate at all
 	
 	this.instantDrop = false;
 	this.freeFall = 0;
