@@ -1,0 +1,4 @@
+div.button { width: 100px; height: 75px; border: 1px solid red; margin-left: auto; margin-right: auto; margin-top: 15px; text-align: center; }
+div.button:hover { cursor: pointer; }
+
+div#result { width: 100px; height: 75px; border: 1px solid red; margin-left: auto; margin-right: auto; margin-top: 15px; text-align: center; }
