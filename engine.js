@@ -4,6 +4,15 @@
  * Filip Kufrej
  */
 
+pieces = [
+        [ 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0 ],
+		[ 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0 ] ];
+
 function Engine() {
 	this.width = 10;	// width of the board (in squares)
 	this.height = 20;	// height of the board
@@ -12,14 +21,18 @@ function Engine() {
 	this.piece = [];	// 4*4 array of the current piece (acessing: y * 4 + x)
 	this.pieceX;		// coordinates of the current piece
 	this.pieceY;
-	this.pieceRotMode;	// rotation mode - pieces usually rotate in counterclockwise
-				// direction, but the game is inconsistent in the way that "I" piece
-				// rotates first counterclockwise and then clockwise,
-				// and "O" piece doesn't rotate at all
+	this.pieceRotMode;	// rotation mode - pieces usually rotate in
+						// counterclockwise
+						// direction, but the game is inconsistent in the way
+						// that "I" piece
+						// rotates first counterclockwise and then clockwise,
+						// and "O" piece doesn't rotate at all
+	this.nextPiece = Math.random();
 	
 	this.instantDrop = false;
 	this.freeFall = 0;
-						
+	
+	this.paused = false;			
 	this.gameOver = false;
 	
 	this.score = 0;
@@ -32,6 +45,20 @@ function Engine() {
 		this.board[i] = 0;
 	}
 	
+	this.pause = function() {
+		this.paused = true;
+	};
+
+	this.resume = function() {
+		if (this.gameOver)
+			return;
+
+		if (this.paused) {
+			this.paused = false;
+			this.start();
+		}
+	};
+
 	this.isGameOver = function() {
 		return this.gameOver;
 	};
@@ -72,6 +99,10 @@ function Engine() {
 		return this.piece[y * 4 + x];
 	};
 	
+	this.getNextPiece = function(x, y) {
+		return pieces[Math.floor(this.nextPiece * 7)][y * 4 + x];
+	};
+
 	this.newPiece = function() {
 		this.instantDrop = false;
 		
@@ -80,65 +111,31 @@ function Engine() {
 		
 		this.pieceRotMode = 1;
 		
-		var r = Math.random();
+		var r = this.nextPiece;
+		this.nextPiece = Math.random();
 		
 		if (r < 1 / 7) {
 			this.pieceRotMode = 0;
-			this.piece = [ // O
-			              0, 0, 0, 0,
-			              0, 1, 1, 0,
-			              0, 1, 1, 0,
-			              0, 0, 0, 0
-			              ];
+			this.piece = pieces[0];
 		} else if (r < 2 / 7) {
 			this.pieceRotMode = 2;
-			this.piece = [ // I
-			              0, 0, 0, 0,
-			              1, 1, 1, 1,
-			              0, 0, 0, 0,
-			              0, 0, 0, 0
-			              ];
+			this.piece = pieces[1];
 		} else if (r < 3 / 7) {
-			this.piece = [ // S
-			              0, 0, 0, 0,
-			              0, 0, 1, 1,
-			              0, 1, 1, 0,
-			              0, 0, 0, 0
-			              ];
+			this.piece = pieces[2];
 		}  else if (r < 4 / 7) {
-			this.piece = [ // Z
-			              0, 0, 0, 0,
-			              0, 1, 1, 0,
-			              0, 0, 1, 1,
-			              0, 0, 0, 0
-			              ];
+			this.piece = pieces[3];
 		} else if (r < 5 / 7) {
-			this.piece = [ // L
-			              0, 0, 0, 0,
-			              0, 1, 1, 1,
-			              0, 1, 0, 0,
-			              0, 0, 0, 0
-			              ];
+			this.piece = pieces[4];
 		} else if (r < 6 / 7) {
-			this.piece = [ // J
-			              0, 0, 0, 0,
-			              0, 1, 1, 1,
-			              0, 0, 0, 1,
-			              0, 0, 0, 0
-			              ];
+			this.piece = pieces[5];
 		} else {
-			this.piece = [ // T
-			              0, 0, 0, 0,
-			              0, 1, 1, 1,
-			              0, 0, 1, 0,
-			              0, 0, 0, 0
-			              ];
+			this.piece = pieces[6];
 		}
 		
 	};
 
 	this.rotatePiece = function() {
-		if (this.gameOver)
+		if (this.paused)
 			return;
 		
 		if (this.pieceRotMode == 0)
@@ -197,6 +194,9 @@ function Engine() {
 	}
 	
 	this.work = function() {
+		if (this.paused)
+			return;
+
 		var willCollide = false;
 		
 		loops:
@@ -219,6 +219,7 @@ function Engine() {
 			this.pieceY++;
 		} else {
 			if (this.getPieceY() == -1) {
+				this.paused = true;
 				this.gameOver = true;
 				return false;
 			}
@@ -275,7 +276,7 @@ function Engine() {
 	
 	this.start = function() {
 		var self = this;
-		if (!this.gameOver) {
+		if (!this.paused) {
 			setTimeout(function() {
 				self.work();
 				self.start();
@@ -284,7 +285,7 @@ function Engine() {
 	};
 
 	this.moveLeft = function() {
-		if (this.gameOver)
+		if (this.paused)
 			return;
 		
 		var willCollide = false;
@@ -311,7 +312,7 @@ function Engine() {
 	};
 
 	this.moveRight = function() {
-		if (this.gameOver)
+		if (this.paused)
 			return;
 		
 		var willCollide = false;
@@ -338,13 +339,13 @@ function Engine() {
 	};
 	
 	this.moveDown = function() {
-		if (this.gameOver)
+		if (this.paused)
 			return;
 		
 		this.instantDrop = true;
 		this.freeFall = this.getPieceY();
 		
-		while (!this.work() && !this.gameOver);
+		while (!this.work() && !this.paused);
 	}
 
 	this.newPiece();
