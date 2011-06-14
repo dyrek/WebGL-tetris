@@ -1,7 +1,7 @@
 
     $(document).ready(function(){
         
-        $('div.button').each(function(){
+        $('div.button, div.button-inline').each(function(){
             $(this).click(function(){
                 $.ajax({
                 url: 'control.php',
