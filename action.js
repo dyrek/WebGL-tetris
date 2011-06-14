@@ -11,7 +11,20 @@
             type: 'post',
             data: 'action=true',
             success: function(msg){
-                $('div#result > p').html(msg);
+                switch (msg) {
+			case 'up':
+				engine.rotatePiece();
+				break;
+			case 'down':
+				engine.moveDown();
+				break;
+			case 'left':
+				engine.moveLeft();
+				break;
+			case 'right':
+				engine.moveRight();
+				break;
+	};
                 getAction();
             }
         });
